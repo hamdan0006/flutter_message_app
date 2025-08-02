@@ -5,7 +5,7 @@ final List<Message> messages = [
   Message(senderName: "John Doe", lastMessage: "Hey, how are you doing?", time: "10:30 AM", avatarIcon: Icons.person, isRead: true),
   Message(senderName: "Sarah Smith", lastMessage: "Meeting at 2pm tomorrow", time: "9:45 AM", avatarIcon: Icons.person),
   Message(senderName: "Team Flutter", lastMessage: "New update available", time: "Yesterday", avatarIcon: Icons.person, isRead: true),
-  Message(senderName: "Freind", lastMessage: "Call me when you're free", time: "Yesterday", avatarIcon: Icons.person),
+  Message(senderName: "Friend", lastMessage: "Call me when you're free", time: "Yesterday", avatarIcon: Icons.person),
   Message(senderName: "David Wilson", lastMessage: "Check out this link", time: "7/25/23", avatarIcon: Icons.person, isRead: true),
   Message(senderName: "Notifications", lastMessage: "Your subscription is expiring soon", time: "7/24/23", avatarIcon: Icons.person),
   Message(senderName: "Alex Johnson", lastMessage: "Did you see the news today?", time: "7/23/23", avatarIcon: Icons.person),

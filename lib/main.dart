@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:message_app/models/message_model.dart';
 import 'package:message_app/data/message_data.dart';
 import 'package:message_app/data/menu_data.dart';
+import 'package:message_app/Data/edit_menu_data.dart'; // New import
 import 'dart:ui';
 
 void main() => runApp(const MyApp());
@@ -28,6 +29,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   bool _showMenu = false;
   bool _showEditMenu = false;
+
   late AnimationController _animationController;
   late AnimationController _editMenuAnimationController;
   late Animation<double> _widthAnimation;
@@ -56,10 +58,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   bool _showNavMessage = false;
 
-
-
-
-
   @override
   void initState() {
     super.initState();
@@ -81,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    _opacityAnimation = Tween<double>(begin: 0.5, end: 1).animate(CurvedAnimation(
+    _opacityAnimation = Tween<double>(begin: 0.3, end: 0.9).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
@@ -104,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
 
     // Edit menu animations
-    _editWidthAnimation = Tween<double>(begin: 80, end: 240).animate(CurvedAnimation(
+    _editWidthAnimation = Tween<double>(begin: 84, end: 240).animate(CurvedAnimation(
       parent: _editMenuAnimationController,
       curve: Curves.easeInOut,
     ));
@@ -122,13 +120,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     ));
     _editBorderRadiusAnimation = BorderRadiusTween(
       begin: BorderRadius.circular(22),
-      end: BorderRadius.circular(24),
+      end: BorderRadius.circular(40),
     ).animate(CurvedAnimation(parent: _editMenuAnimationController, curve: Curves.easeInOut));
     _editContentOffsetAnimation = Tween<Offset>(
       begin: const Offset(0, -15),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _editMenuAnimationController, curve: Curves.easeInOut));
-
     _scrollController.addListener(() {
       if (mounted) {
         setState(() {
@@ -151,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (_showEditMenu) {
         _showEditMenu = false;
         _editMenuAnimationController.reverse();
-        return; // Don't open Main Menu immediately
+        return;
       }
 
       _showMenu = !_showMenu;
@@ -168,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (_showMenu) {
         _showMenu = false;
         _animationController.reverse();
-        return; // Don't open Edit Menu immediately
+        return;
       }
 
       _showEditMenu = !_showEditMenu;
@@ -189,13 +186,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
     });
 
-    // Wait for the widget to rebuild with new messages
     await Future.delayed(const Duration(milliseconds: 50));
-
-    // Calculate the position to scroll to
     final position = _scrollController.position.maxScrollExtent;
-
-    // Animate to the new position
     _scrollController.animateTo(
       position,
       duration: const Duration(milliseconds: 300),
@@ -225,21 +217,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return false;
   }
 
-  final List<Map<String, dynamic>> editMenuItems = [
-    {
-      'icon': Icons.check_circle_outline,
-      'text': 'Select Messages',
-    },
-    {
-      'icon': Icons.push_pin_outlined,
-      'text': 'Edit Pins',
-    },
-    {
-      'icon': Icons.person_outline,
-      'text': 'Set Up Name\n& Photo',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     final visibleMessages = messages.take(_visibleMessagesCount).toList();
@@ -268,12 +245,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Top bar
-
-
-
-
-                          // Message List
                           Expanded(
                             child: Column(
                               children: [
@@ -281,10 +252,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                   child: ListView.builder(
                                     controller: _scrollController,
                                     padding: const EdgeInsets.only(top: 70),
-                                    itemCount: visibleMessages.length + 1, // Add 1 for "Messages" header
+                                    itemCount: visibleMessages.length + 1,
                                     itemBuilder: (context, index) {
                                       if (index == 0) {
-                                        // First item: "Messages" title
                                         return const Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 8.0),
                                           child: Align(
@@ -300,27 +270,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         );
                                       }
 
-                                      final message = visibleMessages[index - 1]; // adjust index
-                                       return AnimatedSwitcher(
+                                      final message = visibleMessages[index - 1];
+                                      return AnimatedSwitcher(
                                         duration: const Duration(milliseconds: 400),
                                         transitionBuilder: (Widget child, Animation<double> animation) {
                                           return FadeTransition(opacity: animation, child: child);
                                         },
                                         child: Padding(
-                                         // assuming each message has a unique id
                                           padding: const EdgeInsets.only(bottom: 16.0),
                                           child: Row(
                                             children: [
                                               CircleAvatar(
                                                 radius: 25,
-                                                backgroundColor: Color.fromRGBO(109, 143, 175, 1), // Slate Gray background
+                                                backgroundColor: Color.fromRGBO(109, 143, 175, 1),
                                                 child: Icon(
                                                   message.avatarIcon,
                                                   size: 28,
-                                                  color: Colors.white, // or any other contrasting color
+                                                  color: Colors.white,
                                                 ),
                                               ),
-
                                               const SizedBox(width: 12),
                                               Expanded(
                                                 child: Column(
@@ -340,7 +308,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                             overflow: TextOverflow.ellipsis,
                                                           ),
                                                         ),
-                                                        const SizedBox(width: 8),
                                                         Text(
                                                           message.time,
                                                           style: TextStyle(
@@ -354,7 +321,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                         ),
                                                       ],
                                                     ),
-                                                    const SizedBox(height: 4),
                                                     Text(
                                                       message.lastMessage,
                                                       style: TextStyle(fontSize: 16, color: Colors.grey[700]),
@@ -367,18 +333,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                           ),
                                         ),
                                       );
-
                                     },
                                   ),
                                 ),
                                 if (hasMoreMessages)
-
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 3.0),
-
+                                  Container(
                                     child: TextButton(
                                       onPressed: _loadMoreMessages,
-                                      child:  Text(
+                                      child: Text(
                                         'View More',
                                         style: TextStyle(
                                           fontSize: 16,
@@ -390,26 +352,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               ],
                             ),
                           ),
-
                         ],
                       ),
                     ),
                   ),
                 ),
-
-                // Bottom Search Bar (iOS style)
-                // Bottom Search Bar (iOS style)
                 Container(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
-
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, -2),
+                      ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      // Search Bar
                       Expanded(
                         child: Container(
                           height: 50,
@@ -447,17 +408,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               IconButton(
                                 icon: Icon(Icons.mic, size: 20, color: Colors.grey[700]),
                                 padding: const EdgeInsets.all(8),
-                                onPressed: () {
-                                  // Voice search action
-                                },
+                                onPressed: () {},
                               ),
                               const SizedBox(width: 4),
                             ],
                           ),
                         ),
                       ),
-
-                      // Notes Icon
                       const SizedBox(width: 12),
                       Container(
                         height: 50,
@@ -475,9 +432,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         ),
                         child: IconButton(
                           icon: Icon(Icons.note_alt_outlined, size: 24, color: Colors.grey[700]),
-                          onPressed: () {
-                            // Notes action
-                          },
+                          onPressed: () {},
                         ),
                       ),
                     ],
@@ -485,16 +440,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 )
               ],
             ),
-
-
-
-            // Main Menu Overlay (three-line menu)
             Container(
-
               child: Stack(
-
                 children: [
-                  // Add this just before the Positioned top menus
                   Positioned(
                     top: 0,
                     left: 0,
@@ -503,13 +451,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                         child: Container(
-                          height: 80, // or full height if needed
-                          color: Colors.white.withOpacity(0.5), // optional subtle tint
+                          height: 80,
+                          color: Colors.white.withOpacity(0.5),
                         ),
                       ),
                     ),
                   ),
-
                   Positioned(
                     top: 24,
                     left: 0,
@@ -529,12 +476,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-
-
-
                   Positioned(
-                    top: 16,  // Adjusted to match edit menu positioning
-                    right: 16, // Adjusted to match edit menu positioning
+                    top: 16,
+                    right: 16,
                     child: GestureDetector(
                       onTap: () {
                         if (!_showMenu) _toggleMenu();
@@ -542,72 +486,93 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       child: AnimatedBuilder(
                         animation: _animationController,
                         builder: (context, child) {
-                          return Opacity(
-                            opacity: 0.9, // Added opacity to match edit menu
-                            child: Material(
-                              color: Colors.white.withOpacity(0.9), // Matched edit menu styling
-                              borderRadius: BorderRadius.circular(90), // Matched edit menu styling
-                              elevation: 2, // Added elevation to match edit menu
-                              child: Container(
-                                key: menuKey,
-                                width: _widthAnimation.value,
-                                height: _heightAnimation.value,
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8), // Added padding to match edit menu
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.9), // Matched edit menu styling
+                          final double currentWidth = _widthAnimation.value.clamp(44, 220);
+                          final bool canShowContent = currentWidth > 100;
+
+                          return ClipRRect(
+                            borderRadius: _borderRadiusAnimation.value ?? BorderRadius.circular(22),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(
+                                sigmaX: _showMenu ? 1.5 : 0,
+                                sigmaY: _showMenu ? 1.5 : 0,
+                              ),
+                              child: Opacity(
+                                opacity: 0.8,
+                                child: Material(
                                   borderRadius: _borderRadiusAnimation.value,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1 * _opacityAnimation.value),
-                                      blurRadius: 20, // Adjusted to match edit menu
-                                      offset: const Offset(0, 4),
+                                  elevation: 2,
+                                  child: Container(
+                                    key: menuKey,
+                                    width: currentWidth,
+                                    height: _heightAnimation.value,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(_showMenu ? 0.7 : 0.9),
+                                      borderRadius: _borderRadiusAnimation.value,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1 * _opacityAnimation.value),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                                child: _showMenu
-                                    ? Opacity(
-                                  opacity: _opacityAnimation.value,
-                                  child: Transform.scale(
-                                    scale: _scaleAnimation.value,
-                                    child: Transform.translate(
-                                      offset: _contentOffsetAnimation.value,
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            for (final item in menuItems)
-                                              if (item.containsKey('divider'))
-                                                const Divider(height: 1, color: Colors.grey)
-                                              else if (item.containsKey('header'))
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 0, top: 12, bottom: 8),
-                                                  child: Text(
-                                                    item['header'],
-                                                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                    child: _showMenu
+                                        ? Opacity(
+                                      opacity: _opacityAnimation.value,
+                                      child: Transform.scale(
+                                        scale: _scaleAnimation.value,
+                                        child: Transform.translate(
+                                          offset: _contentOffsetAnimation.value,
+                                          child: canShowContent
+                                              ? SingleChildScrollView(
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                for (final item in menuItems)
+                                                  Builder(
+                                                    builder: (_) {
+                                                      if (item.containsKey('divider')) {
+                                                        return Divider(height: 0.5, color: Colors.grey[500]);
+                                                      } else if (item.containsKey('header')) {
+                                                        return Padding(
+                                                          padding: const EdgeInsets.only(left: 0, top: 12, bottom: 8),
+                                                          child: Text(
+                                                            item['header'],
+                                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        );
+                                                      } else {
+                                                        return _buildMenuItem(
+                                                          icon: item['icon'],
+                                                          text: item['text'],
+                                                          hasCheckmark: item['check'] ?? false,
+                                                        );
+                                                      }
+                                                    },
                                                   ),
-                                                )
-                                              else
-                                                _buildMenuItem(
-                                                  icon: item['icon'],
-                                                  text: item['text'],
-                                                  hasCheckmark: item['check'] ?? false,
-                                                ),
-                                          ],
+                                              ],
+                                            ),
+                                          )
+                                              : const SizedBox(),
                                         ),
                                       ),
+                                    )
+                                        : Opacity(
+                                      opacity: _iconOpacityAnimation.value,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(height: 2.5, width: 20, margin: const EdgeInsets.only(bottom: 4), color: Colors.black),
+                                          Container(height: 2, width: 14, margin: const EdgeInsets.only(bottom: 4), color: Colors.black),
+                                          Container(height: 2, width: 10, color: Colors.black),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                )
-                                    : Opacity(
-                                  opacity: _iconOpacityAnimation.value,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(height: 2.5, width: 20, margin: const EdgeInsets.only(bottom: 4), color: Colors.black),
-                                      Container(height: 2, width: 14, margin: const EdgeInsets.only(bottom: 4), color: Colors.black),
-                                      Container(height: 2, width: 10, color: Colors.black),
-                                    ],
                                   ),
                                 ),
                               ),
@@ -617,82 +582,105 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-
-
-                  // Edit Menu Overlay
                   Positioned(
                     top: 16,
                     left: 16,
                     child: GestureDetector(
-                      onTap: () {
-                        if (!_showEditMenu) _toggleEditMenu();
-                      },
+                      onTap: _toggleEditMenu,
                       child: AnimatedBuilder(
                         animation: _editMenuAnimationController,
                         builder: (context, child) {
-                          return Opacity(
-                            opacity: 0.9, // <--- Main opacity control here
-                            child: Material(
-                              color: Colors.white.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(90),
-                              elevation: 2,
-                              child: Container(
-                                key: editMenuKey,
-                                width: _editWidthAnimation.value,
-                                height: _editHeightAnimation.value,
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
-                                decoration: BoxDecoration(
+                          return _showEditMenu
+                              ? ClipRRect(
+                            borderRadius: _editBorderRadiusAnimation.value ?? BorderRadius.circular(22),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
+                              child: Opacity(
+                                opacity: 0.8,
+                                child: Material(
+                                  color: Colors.transparent,
                                   borderRadius: _editBorderRadiusAnimation.value,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1 * _editOpacityAnimation.value),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 4),
+                                  elevation: 2,
+                                  child: Container(
+                                    key: editMenuKey,
+                                    width: _editWidthAnimation.value,
+                                    height: _editHeightAnimation.value,
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.9),
+                                      borderRadius: _editBorderRadiusAnimation.value,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1 * _editOpacityAnimation.value),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                  color: Colors.white.withOpacity(0.9), // Match Material opacity
-                                ),
-                                child: _showEditMenu
-                                    ? Opacity(
-                                  opacity: _editOpacityAnimation.value,
-                                  child: Transform.scale(
-                                    scale: _editScaleAnimation.value,
-                                    child: Transform.translate(
-                                      offset: _editContentOffsetAnimation.value,
-                                      child: SingleChildScrollView(
-                                        child: ConstrainedBox(
-                                          constraints: const BoxConstraints(maxHeight: 180),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              for (final item in editMenuItems)
-                                                _buildEditMenuItem(
-                                                  icon: item['icon'],
-                                                  text: item['text'],
+                                    child: Opacity(
+                                      opacity: _editOpacityAnimation.value,
+                                      child: Transform.scale(
+                                        scale: _editScaleAnimation.value,
+                                        child: Transform.translate(
+                                          offset: _editContentOffsetAnimation.value,
+                                          child: LayoutBuilder(
+                                            builder: (context, constraints) {
+                                              return SingleChildScrollView(
+                                                physics: const ClampingScrollPhysics(),
+                                                child: ConstrainedBox(
+                                                  constraints: BoxConstraints(
+                                                    minHeight: constraints.maxHeight,
+                                                  ),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      for (final item in editMenuItems) // Using the imported list
+                                                        _buildEditMenuItem(
+                                                          icon: item['icon'],
+                                                          text: item['text'],
+                                                        ),
+                                                    ],
+                                                  ),
                                                 ),
-                                            ],
+                                              );
+                                            },
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                )
-                                    : const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 1, horizontal: 19),
-                                      child: Text(
-                                        'Edit',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
                                 ),
+                              ),
+                            ),
+                          )
+                              : Material(
+                            borderRadius: _editBorderRadiusAnimation.value,
+                            elevation: 2,
+                            child: Container(
+                              key: editMenuKey,
+                              width: _editWidthAnimation.value,
+                              height: _editHeightAnimation.value,
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.9),
+                                borderRadius: _editBorderRadiusAnimation.value,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1 * _editOpacityAnimation.value),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 1, horizontal: 19),
+                                    child: Text('Edit'),
+                                  ),
+                                ],
                               ),
                             ),
                           );
@@ -700,14 +688,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-
-
-
-
                 ],
               ),
             )
-
           ],
         ),
       ),
@@ -724,7 +707,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (hasCheckmark) const Icon(Icons.check, size: 20, color: Colors.blue),
+          if (hasCheckmark) const Icon(Icons.check, size: 20, color: Colors.black),
           if (hasCheckmark) const SizedBox(width: 8),
           Icon(icon, size: 22, color: Colors.grey[700]),
           const SizedBox(width: 12),
